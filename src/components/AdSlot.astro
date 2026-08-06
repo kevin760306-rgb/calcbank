@@ -1,0 +1,16 @@
+---
+interface Props {
+	position: 'top' | 'middle' | 'bottom';
+}
+const { position } = Astro.props;
+const label = {
+	top: '광고 영역 · 계산기 상단',
+	middle: '광고 영역 · 콘텐츠 중간',
+	bottom: '광고 영역 · 페이지 하단',
+}[position];
+---
+
+<!-- AD_SLOT -->
+<div class="ad-slot" data-ad-position={position} aria-hidden="true">
+	{label}
+</div>

@@ -1,0 +1,10 @@
+---
+interface Props {
+	text?: string;
+}
+const {
+	text = '본 계산 결과는 이해를 돕기 위한 간이 계산이며 법적·세무적 효력이 없습니다. 실제 금액은 관련 기관의 공식 계산과 다를 수 있습니다.',
+} = Astro.props;
+---
+
+<p class="disclaimer">{text}</p>

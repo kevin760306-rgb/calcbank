@@ -1,0 +1,23 @@
+---
+import { getRelated } from '../data/calculators-meta.js';
+
+interface Props {
+	slug: string;
+}
+const { slug } = Astro.props;
+const related = getRelated(slug, 3);
+---
+
+<section class="content-section">
+	<h2>다른 계산기 보기</h2>
+	<div class="related-links">
+		{
+			related.map((c) => (
+				<a href={`/${c.slug}/`}>
+					<span class="related-links__label">No. {c.no}</span>
+					{c.title}
+				</a>
+			))
+		}
+	</div>
+</section>

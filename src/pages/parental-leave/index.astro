@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '육아휴직 급여 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'2026년 개편된 3구간 정률제(1~3개월 250만원, 4~6개월 200만원, 7개월 이후 160만원 상한)를 반영한 육아휴직 급여 계산기.';
+const pageUrl = new URL('/parental-leave/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '2026년 육아휴직 제도가 어떻게 바뀌었나요?',
+		a: '최장 휴직 기간이 1년에서 1년 6개월로 늘었고, 급여도 시기별 3구간 정률제로 바뀌었습니다. 1~3개월과 4~6개월은 통상임금 100%(상한액만 다름), 7개월 이후는 통상임금 80%가 지급되며, 복직 후 지급되던 사후지급금 제도는 폐지되어 휴직 중 매달 전액 지급됩니다.',
+	},
+	{
+		q: '통상임금이 낮으면 얼마를 받나요?',
+		a: '계산된 금액이 하한액(70만원)보다 낮으면 하한액인 70만원이 보장됩니다. 다만 이 하한액은 2026년 개편 발표에서 별도로 조정되었는지 확인되지 않아 종전 금액을 기준으로 안내합니다.',
+	},
+	{
+		q: '부모가 같이 육아휴직을 쓰면 더 받을 수 있나요?',
+		a: '자녀 생후 18개월 이내에 부모가 함께(또는 순차적으로) 육아휴직을 사용하는 "6+6 부모공동휴직" 제도를 이용하면 첫 6개월간 통상임금 100%가 지급되며 상한액이 1개월 차 200만원에서 6개월 차 450만원까지 단계적으로 올라갑니다. 이 계산기는 부모 개별 신청 기준(일반 육아휴직급여)만 계산합니다.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '육아휴직 급여 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>육아휴직 급여 계산기</h1>
+	<p>통상임금과 휴직 예정 개월 수를 입력하면 2026년 개편 기준 월별·총 육아휴직급여를 계산합니다.</p>
+
+	<CalculatorCard no="08" label="PARENTAL LEAVE PAY">
+		<form id="parental-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="ordinaryWage">월 통상임금</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="ordinaryWage" required placeholder="3,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="months">휴직 예정 기간</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="months" required placeholder="12" />
+						<span class="field__unit">개월</span>
+					</div>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">육아휴직급여 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label">1~3개월 월 지급액</span>
+				<span class="value" id="r-tier1">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">4~6개월 월 지급액</span>
+				<span class="value" id="r-tier2">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">7개월 이후 월 지급액</span>
+				<span class="value" id="r-tier3">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">총 예상 지급액</span>
+				<span class="value" id="r-total">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>육아휴직급여, 2026년부터 이렇게 계산합니다</h2>
+		<p>
+			육아휴직급여는 휴직한 달을 기준으로 세 구간에 걸쳐 다른 비율과 상한액이 적용됩니다. 월 지급액은
+			"통상임금 × 지급률"과 "구간별 상한액" 중 더 낮은 금액이며, 계산된 금액이 하한액(70만원)보다
+			낮으면 하한액을 지급합니다.
+		</p>
+		<table>
+			<tbody>
+				<tr><th>1~3개월</th><td>통상임금 100%, 월 상한 250만원</td></tr>
+				<tr><th>4~6개월</th><td>통상임금 100%, 월 상한 200만원</td></tr>
+				<tr><th>7개월 이후</th><td>통상임금 80%, 월 상한 160만원</td></tr>
+			</tbody>
+		</table>
+		<p>
+			2026년 개편으로 육아휴직 최장 기간이 1년에서 1년 6개월로 늘었고, 휴직 급여의 25%를 복직 후
+			6개월 근무 시 일괄 지급하던 사후지급금 제도가 폐지되어 휴직 중 매달 전액을 받을 수 있게
+			되었습니다. 통상임금은 근로기준법상 정기적·일률적으로 지급되는 임금(기본급, 직책수당 등)을
+			기준으로 하며, 회사마다 포함 항목이 다를 수 있으므로 급여명세서의 통상임금 항목을 확인하는
+			것이 정확합니다. 부모가 함께 또는 순차로 육아휴직을 쓰는 "6+6 부모공동휴직" 특례는 이 계산기와
+			별도로 계산해야 합니다.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="parental-leave" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script>
+	import { calcMonthlyParentalLeavePay, calcParentalLeavePay } from '../../lib/parentalLeave.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	attachCommaFormatting(document.getElementById('ordinaryWage'));
+
+	const form = document.getElementById('parental-form');
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const ordinaryWage = parseNumber(document.getElementById('ordinaryWage').value);
+		const months = parseNumber(document.getElementById('months').value);
+
+		const result = calcParentalLeavePay({ ordinaryWage, months });
+
+		document.getElementById('r-tier1').textContent = formatWon(calcMonthlyParentalLeavePay(ordinaryWage, 1));
+		document.getElementById('r-tier2').textContent = formatWon(calcMonthlyParentalLeavePay(ordinaryWage, 4));
+		document.getElementById('r-tier3').textContent = formatWon(calcMonthlyParentalLeavePay(ordinaryWage, 7));
+		document.getElementById('r-total').textContent = formatWon(result.totalPay);
+
+		document.getElementById('result').classList.add('is-visible');
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+	});
+</script>

@@ -1,0 +1,200 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '퇴직금 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'평균임금과 근속연수로 퇴직금을 자동 계산합니다. 최근 3개월 임금, 상여금, 연차수당까지 반영한 2026년 기준 퇴직금 계산기.';
+const pageUrl = new URL('/severance/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '퇴직금은 어떻게 계산되나요?',
+		a: '퇴직금은 "1일 평균임금 × 30일 × (총 재직일수 ÷ 365)"로 계산합니다. 1일 평균임금은 퇴직 직전 3개월 동안 받은 임금 총액을 그 기간의 총 일수로 나눈 값입니다.',
+	},
+	{
+		q: '근속 1년 미만도 퇴직금을 받을 수 있나요?',
+		a: '근로자퇴직급여 보장법에 따라 계속근로기간이 1년 이상이어야 법정 퇴직금 지급 의무가 발생합니다. 1년 미만 근속자는 원칙적으로 법정 퇴직금 대상이 아닙니다.',
+	},
+	{
+		q: '상여금과 연차수당도 퇴직금에 포함되나요?',
+		a: '네. 퇴직 전 1년간 지급된 상여금과 연차수당은 3개월분(연간 금액 × 3/12)으로 환산하여 평균임금 산정에 포함하는 것이 일반적입니다. 이 계산기에서도 해당 항목을 선택적으로 반영할 수 있습니다.',
+	},
+	{
+		q: '계산된 금액이 실제 지급액과 다를 수 있나요?',
+		a: '네. 이 계산기는 통상적인 산정 방식을 적용한 간이 계산기이며, 실제 평균임금 산정 시 제외되는 임금 항목, 휴업기간 등 예외 사항은 반영하지 않습니다. 또한 퇴직소득세 등 세금은 차감 전 금액입니다. 정확한 금액은 사업장 급여 담당자 또는 고용노동부 임금체불 상담(1350)을 통해 확인하세요.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '퇴직금 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>퇴직금 계산기</h1>
+	<p>입사일과 퇴사일, 최근 3개월 임금을 입력하면 2026년 기준 산정 방식으로 예상 퇴직금을 계산합니다.</p>
+
+	<CalculatorCard no="01" label="RETIREMENT PAY">
+		<form id="severance-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="startDate">입사일</label>
+					<div class="field__control">
+						<input type="date" id="startDate" name="startDate" required />
+					</div>
+				</div>
+				<div class="field">
+					<label for="endDate">퇴사일(예정일)</label>
+					<div class="field__control">
+						<input type="date" id="endDate" name="endDate" required />
+					</div>
+				</div>
+				<div class="field">
+					<label for="threeMonthWage">최근 3개월 총 급여</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="threeMonthWage" required placeholder="9,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="annualBonus">연간 상여금 (선택)</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="annualBonus" placeholder="0" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="annualLeaveAllowance">연차수당 (선택)</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="annualLeaveAllowance" placeholder="0" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">퇴직금 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label">총 재직일수</span>
+				<span class="value" id="r-serviceDays">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">1일 평균임금</span>
+				<span class="value" id="r-avgWage">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">예상 퇴직금(세전)</span>
+				<span class="value" id="r-severance">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+			<p id="r-warning" class="disclaimer" style="display:none; border-color:#bf3b2b; color:#bf3b2b;">
+				입력하신 기간은 근속 1년 미만으로, 법정 퇴직금 지급 의무 대상이 아닙니다. 아래 금액은
+				참고용 시산 값입니다.
+			</p>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>퇴직금, 어떻게 계산되나요?</h2>
+		<p>
+			퇴직금은 근로자퇴직급여 보장법 제8조에 따라 사용자가 계속근로기간 1년에 대해 30일분 이상의
+			평균임금을 퇴직금으로 지급하도록 정한 제도입니다. 계산식은 다음과 같습니다.
+		</p>
+		<table>
+			<tbody>
+				<tr>
+					<th>1일 평균임금</th>
+					<td>퇴직 직전 3개월간 지급된 임금 총액 ÷ 그 기간의 총 일수</td>
+				</tr>
+				<tr>
+					<th>퇴직금</th>
+					<td>1일 평균임금 × 30일 × (총 재직일수 ÷ 365)</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>
+			여기서 "임금 총액"에는 기본급과 각종 수당(직책수당, 식대 등 통상적·정기적으로 지급되는
+			항목)이 포함됩니다. 상여금과 연차수당은 퇴직 전 1년간 지급된 금액의 3/12을 3개월분에
+			가산하는 방식으로 반영하는 것이 실무상 일반적입니다. 이 계산기는 이러한 표준 산정 방식을
+			따르되, 개별 사업장의 취업규칙이나 단체협약에 따라 평균임금 산정 대상 항목이 달라질 수
+			있다는 점을 유의해야 합니다.
+		</p>
+		<p>
+			근속연수가 1년 미만이면 법적으로 퇴직금 지급 의무가 없습니다. 반대로 근속기간 중 육아휴직,
+			휴업 등으로 임금이 지급되지 않은 기간이 있다면 평균임금 산정 시 해당 기간과 그 기간 중
+			임금을 제외하고 계산해야 하므로, 실제 값과 이 계산기의 결과가 다를 수 있습니다. 또한 이
+			계산기는 세전 금액을 보여주며, 실제 수령액은 퇴직소득세와 지방소득세를 공제한 금액입니다.
+			퇴직소득세는 근속연수공제와 환산급여공제 등 별도의 공제 구조를 거치는 누진세율이 적용되어
+			일반 소득세와 계산 방식이 다릅니다. 정확한 세후 수령액이 필요하다면 국세청 홈택스의 퇴직소득
+			세액 계산 서비스를 함께 확인하는 것을 권장합니다.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="severance" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script>
+	import { calcSeverancePay } from '../../lib/severance.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	const form = document.getElementById('severance-form');
+	const numberInputs = ['threeMonthWage', 'annualBonus', 'annualLeaveAllowance'];
+	numberInputs.forEach((id) => {
+		const el = document.getElementById(id);
+		if (el instanceof HTMLInputElement) attachCommaFormatting(el);
+	});
+
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const startDate = document.getElementById('startDate').value;
+		const endDate = document.getElementById('endDate').value;
+		const threeMonthWage = parseNumber(document.getElementById('threeMonthWage').value);
+		const annualBonus = parseNumber(document.getElementById('annualBonus').value);
+		const annualLeaveAllowance = parseNumber(
+			document.getElementById('annualLeaveAllowance').value
+		);
+
+		const result = calcSeverancePay({
+			startDate,
+			endDate,
+			threeMonthWage,
+			annualBonus,
+			annualLeaveAllowance,
+		});
+
+		document.getElementById('r-serviceDays').textContent = `${result.serviceDays.toLocaleString('ko-KR')}일`;
+		document.getElementById('r-avgWage').textContent = formatWon(result.averageDailyWage);
+		document.getElementById('r-severance').textContent = formatWon(result.severancePay);
+
+		const warning = document.getElementById('r-warning');
+		warning.style.display = result.eligible ? 'none' : 'block';
+
+		const resultBox = document.getElementById('result');
+		resultBox.classList.add('is-visible');
+
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+	});
+</script>

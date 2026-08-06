@@ -1,0 +1,245 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '대출 이자 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'원리금균등, 원금균등, 만기일시상환 방식별 대출 상환액과 총 이자를 비교 계산합니다. 월별 상환 스케줄과 원금·이자 비율 차트 제공.';
+const pageUrl = new URL('/loan/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '원리금균등상환과 원금균등상환의 차이는 무엇인가요?',
+		a: '원리금균등상환은 매달 갚는 총액(원금+이자)이 만기까지 동일합니다. 원금균등상환은 매달 갚는 원금이 동일하고 이자는 잔액이 줄어들수록 감소해, 초기 상환액은 크고 후반으로 갈수록 줄어듭니다. 총 이자는 원금균등상환이 더 적습니다.',
+	},
+	{
+		q: '만기일시상환은 어떤 방식인가요?',
+		a: '대출 기간 동안 매달 이자만 납부하다가 만기에 원금을 한 번에 상환하는 방식입니다. 매달 부담은 가장 적지만 총 이자 부담은 세 방식 중 가장 큽니다.',
+	},
+	{
+		q: '중도상환수수료는 반영되나요?',
+		a: '이 계산기는 약정된 이자율과 상환 방식만으로 계산하며, 중도상환수수료나 인지세, 각종 대출 부대비용은 포함하지 않습니다.',
+	},
+	{
+		q: '변동금리 대출도 계산할 수 있나요?',
+		a: '이 계산기는 입력한 연이율이 대출 기간 내내 고정된다고 가정합니다. 변동금리 상품은 금리 변경 시점마다 다시 계산해야 정확한 값을 얻을 수 있습니다.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '대출 이자 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>대출 이자 계산기</h1>
+	<p>대출원금, 연이율, 대출기간과 상환 방식을 입력하면 월별 상환 스케줄과 총 이자를 계산합니다.</p>
+
+	<CalculatorCard no="02" label="LOAN REPAYMENT">
+		<form id="loan-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="principal">대출 원금</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="principal" required placeholder="120,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="annualRate">연이율</label>
+					<div class="field__control">
+						<input type="text" inputmode="decimal" id="annualRate" required placeholder="4.8" />
+						<span class="field__unit">%</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="years">대출 기간</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="years" required placeholder="30" />
+						<span class="field__unit">년</span>
+					</div>
+				</div>
+			</div>
+			<div class="field" style="margin-top:16px;">
+				<label>상환 방식</label>
+				<div class="field-radio-group">
+					<label><input type="radio" name="type" value="equal-installment" checked /><span>원리금균등</span></label>
+					<label><input type="radio" name="type" value="equal-principal" /><span>원금균등</span></label>
+					<label><input type="radio" name="type" value="bullet" /><span>만기일시</span></label>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">상환액 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label" id="r-payment-label">월 상환액(1회차)</span>
+				<span class="value" id="r-payment">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">총 이자</span>
+				<span class="value" id="r-interest">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">총 상환액</span>
+				<span class="value" id="r-total">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+		</div>
+
+		<div id="chart-wrap" style="max-width:220px; margin:24px auto 0; display:none;">
+			<canvas id="ratio-chart" width="220" height="220"></canvas>
+		</div>
+
+		<div id="schedule-wrap" style="display:none; margin-top:24px;">
+			<h3>월별 상환 스케줄</h3>
+			<div style="max-height:320px; overflow-y:auto; border:1px solid var(--line); border-radius:6px;">
+				<table style="margin:0;">
+					<thead>
+						<tr>
+							<th>회차</th>
+							<th>납입액</th>
+							<th>원금</th>
+							<th>이자</th>
+							<th>잔액</th>
+						</tr>
+					</thead>
+					<tbody id="schedule-body"></tbody>
+				</table>
+			</div>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>대출 상환 방식, 무엇이 다를까</h2>
+		<p>
+			대출 이자는 매달 남은 원금(잔액)에 월이율을 곱해 계산됩니다. 월이율은 연이율을 12로 나눈
+			값을 사용합니다. 같은 원금과 금리라도 상환 방식에 따라 매달 부담과 총 이자가 크게
+			달라집니다.
+		</p>
+		<table>
+			<tbody>
+				<tr>
+					<th>원리금균등상환</th>
+					<td>매달 원금+이자 합계가 일정. 초반엔 이자 비중이 크고 후반으로 갈수록 원금 비중이 커짐. 가장 널리 쓰이는 방식.</td>
+				</tr>
+				<tr>
+					<th>원금균등상환</th>
+					<td>매달 갚는 원금이 일정. 초반 상환 부담이 크지만 잔액이 빨리 줄어 총 이자가 가장 적음.</td>
+				</tr>
+				<tr>
+					<th>만기일시상환</th>
+					<td>만기까지 이자만 내다가 마지막에 원금을 한 번에 상환. 월 부담은 가장 적지만 총 이자는 가장 많음.</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>
+			이 계산기는 입력한 연이율이 대출 기간 동안 변하지 않는다고 가정하고, 매월 1회 이자가
+			부과되는 것을 전제로 계산합니다. 실제 은행 상품은 거치기간, 중도상환수수료, 각종
+			취급수수료가 붙을 수 있으므로 대출 실행 전 반드시 금융회사의 대출조건 안내서를 확인하세요.
+			원리금균등상환의 월 상환액은 연금현가 공식을 사용해 계산하며, 마지막 회차에는 반올림 오차로
+			남을 수 있는 잔액을 정리해 최종 잔액이 정확히 0원이 되도록 처리합니다.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="loan" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<script>
+	import { buildLoanSchedule } from '../../lib/loan.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	attachCommaFormatting(document.getElementById('principal'));
+
+	const form = document.getElementById('loan-form');
+	let chartInstance = null;
+
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const principal = parseNumber(document.getElementById('principal').value);
+		const annualRatePercent = parseFloat(document.getElementById('annualRate').value) || 0;
+		const years = parseNumber(document.getElementById('years').value);
+		const months = years * 12;
+		const type = form.querySelector('input[name="type"]:checked').value;
+
+		if (!principal || !months) return;
+
+		const { schedule, totalPayment, totalInterest } = buildLoanSchedule({
+			principal,
+			annualRatePercent,
+			months,
+			type,
+		});
+
+		const paymentLabel = document.getElementById('r-payment-label');
+		if (type === 'equal-installment') {
+			paymentLabel.textContent = '월 상환액(균등)';
+		} else {
+			paymentLabel.textContent = '월 상환액(1회차)';
+		}
+		document.getElementById('r-payment').textContent = formatWon(schedule[0].payment);
+		document.getElementById('r-interest').textContent = formatWon(totalInterest);
+		document.getElementById('r-total').textContent = formatWon(totalPayment);
+
+		document.getElementById('result').classList.add('is-visible');
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+
+		const tbody = document.getElementById('schedule-body');
+		tbody.innerHTML = schedule
+			.map(
+				(r) =>
+					`<tr><td>${r.month}</td><td>${r.payment.toLocaleString('ko-KR')}</td><td>${r.principal.toLocaleString('ko-KR')}</td><td>${r.interest.toLocaleString('ko-KR')}</td><td>${r.balance.toLocaleString('ko-KR')}</td></tr>`
+			)
+			.join('');
+		document.getElementById('schedule-wrap').style.display = 'block';
+
+		const chartWrap = document.getElementById('chart-wrap');
+		chartWrap.style.display = 'block';
+		const ctx = document.getElementById('ratio-chart');
+		const ChartCtor = window.Chart;
+		if (ChartCtor) {
+			if (chartInstance) chartInstance.destroy();
+			chartInstance = new ChartCtor(ctx, {
+				type: 'doughnut',
+				data: {
+					labels: ['원금', '이자'],
+					datasets: [
+						{
+							data: [principal, totalInterest],
+							backgroundColor: ['#0f5132', '#bf3b2b'],
+							borderColor: '#fdfdfb',
+						},
+					],
+				},
+				options: {
+					plugins: {
+						legend: { position: 'bottom', labels: { font: { family: 'Pretendard' } } },
+					},
+				},
+			});
+		}
+	});
+</script>

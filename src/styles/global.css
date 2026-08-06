@@ -1,0 +1,580 @@
+/* ============================================================
+   머니장부 디자인 시스템 — 한국 통장/장부 콘셉트
+   ============================================================ */
+
+:root {
+	--ink: #1c2b24;
+	--paper: #f4f5f1;
+	--card: #fdfdfb;
+	--line: #d9ddd4;
+	--ledger: #0f5132;
+	--ledger-dark: #0a3a24;
+	--seal: #bf3b2b;
+	--muted: #6f7a70;
+
+	--font-title: 'Gowun Batang', 'Noto Serif KR', serif;
+	--font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+	--font-mono: 'IBM Plex Mono', 'Consolas', monospace;
+
+	--radius: 6px;
+	--shadow-card: 0 1px 3px rgba(28, 43, 36, 0.08), 0 6px 20px rgba(28, 43, 36, 0.06);
+	--container: 760px;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--paper);
+	color-scheme: light;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-body);
+	color: var(--ink);
+	background: var(--paper);
+	line-height: 1.7;
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+}
+
+img,
+svg {
+	max-width: 100%;
+	display: block;
+}
+
+a {
+	color: var(--ledger);
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-title);
+	line-height: 1.35;
+	margin: 0 0 0.6em;
+	color: var(--ink);
+}
+
+h1 {
+	font-size: clamp(1.6rem, 4vw, 2.1rem);
+}
+
+h2 {
+	font-size: clamp(1.25rem, 3vw, 1.5rem);
+	border-bottom: 2px solid var(--ink);
+	padding-bottom: 0.4em;
+}
+
+h3 {
+	font-size: 1.1rem;
+}
+
+p {
+	margin: 0 0 1em;
+}
+
+.mono,
+.num {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum' 1;
+}
+
+/* ---------- 레이아웃 ---------- */
+
+.site-wrap {
+	max-width: var(--container);
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+.site-header {
+	border-bottom: 1px solid var(--line);
+	background: var(--card);
+}
+
+.site-header__inner {
+	max-width: var(--container);
+	margin: 0 auto;
+	padding: 16px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.brand {
+	font-family: var(--font-title);
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--ink);
+	text-decoration: none;
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+}
+
+.brand__mark {
+	color: var(--ledger);
+}
+
+.site-nav {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+	font-size: 0.85rem;
+}
+
+.site-nav a {
+	color: var(--muted);
+	text-decoration: none;
+	padding: 6px 8px;
+	border-radius: var(--radius);
+}
+
+.site-nav a:hover {
+	background: var(--paper);
+	color: var(--ink);
+}
+
+main {
+	padding: 32px 0 64px;
+}
+
+.site-footer {
+	border-top: 1px solid var(--line);
+	padding: 24px 0 40px;
+	color: var(--muted);
+	font-size: 0.82rem;
+}
+
+.site-footer a {
+	color: var(--muted);
+}
+
+.site-footer__links {
+	display: flex;
+	gap: 14px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+/* ---------- 장부 카드 (계산기 컨테이너) ---------- */
+
+.ledger-card {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-card);
+	padding: 24px;
+	margin: 20px 0 32px;
+}
+
+.ledger-card__header {
+	font-family: var(--font-mono);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.72rem;
+	color: var(--muted);
+	border-bottom: 1px dashed var(--line);
+	padding-bottom: 10px;
+	margin-bottom: 18px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.ledger-card__header span:last-child {
+	color: var(--seal);
+}
+
+/* ---------- 입력 필드 ---------- */
+
+.field-grid {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.field label {
+	font-size: 0.85rem;
+	color: var(--muted);
+}
+
+.field .field__control {
+	position: relative;
+	display: flex;
+	align-items: center;
+	border-bottom: 1.5px solid var(--ink);
+	padding-bottom: 4px;
+}
+
+.field input,
+.field select {
+	flex: 1;
+	border: none;
+	background: transparent;
+	font-family: var(--font-mono);
+	font-size: 1.05rem;
+	font-variant-numeric: tabular-nums;
+	color: var(--ink);
+	padding: 4px 2px;
+	outline: none;
+	min-width: 0;
+}
+
+.field select {
+	font-family: var(--font-body);
+	font-size: 0.95rem;
+}
+
+.field .field__unit {
+	font-size: 0.85rem;
+	color: var(--muted);
+	white-space: nowrap;
+	padding-left: 6px;
+}
+
+.field-radio-group {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.field-radio-group label {
+	font-size: 0.85rem;
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	padding: 6px 14px;
+	cursor: pointer;
+	color: var(--muted);
+	background: var(--paper);
+}
+
+.field-radio-group input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.field-radio-group input:checked + span,
+.field-radio-group label:has(input:checked) {
+	color: #fff;
+	background: var(--ledger);
+	border-color: var(--ledger);
+}
+
+.btn-calc {
+	margin-top: 20px;
+	width: 100%;
+	padding: 14px;
+	font-size: 1rem;
+	font-weight: 700;
+	font-family: var(--font-body);
+	color: #fff;
+	background: var(--ledger);
+	border: none;
+	border-radius: var(--radius);
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.btn-calc:hover {
+	background: var(--ledger-dark);
+}
+
+.btn-calc:active {
+	transform: translateY(1px);
+}
+
+/* ---------- 결과: 장부 인자 라인 ---------- */
+
+.ledger-result {
+	margin-top: 24px;
+	background-image: repeating-linear-gradient(
+		to bottom,
+		transparent 0,
+		transparent 39px,
+		var(--line) 39px,
+		var(--line) 40px
+	);
+	display: none;
+}
+
+.ledger-result.is-visible {
+	display: block;
+}
+
+.ledger-result__row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	height: 40px;
+	font-size: 0.95rem;
+}
+
+.ledger-result__row .label {
+	color: var(--muted);
+}
+
+.ledger-result__row .value {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.ledger-result__row--total {
+	border-top: 1px dashed var(--ink);
+}
+
+.ledger-result__row--total .value {
+	color: var(--ledger);
+	font-size: 1.15rem;
+}
+
+/* ---------- 도장 스탬프 ---------- */
+
+.result-stamp-wrap {
+	position: relative;
+	margin-top: 18px;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.result-stamp {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 76px;
+	height: 76px;
+	border-radius: 50%;
+	border: 3px solid var(--seal);
+	color: var(--seal);
+	font-family: var(--font-title);
+	font-weight: 700;
+	font-size: 1.1rem;
+	letter-spacing: 0.1em;
+	transform: rotate(-9deg) scale(1.6);
+	opacity: 0;
+}
+
+.result-stamp.is-visible {
+	animation: stamp-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.15) forwards;
+}
+
+@keyframes stamp-in {
+	0% {
+		opacity: 0;
+		transform: rotate(-9deg) scale(2.1);
+	}
+	55% {
+		opacity: 1;
+		transform: rotate(-9deg) scale(0.92);
+	}
+	80% {
+		transform: rotate(-9deg) scale(1.04);
+	}
+	100% {
+		opacity: 1;
+		transform: rotate(-9deg) scale(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.result-stamp.is-visible {
+		animation: none;
+		opacity: 1;
+		transform: rotate(-9deg) scale(1);
+	}
+}
+
+/* ---------- 면책 문구 ---------- */
+
+.disclaimer {
+	font-size: 0.8rem;
+	color: var(--muted);
+	background: var(--paper);
+	border: 1px dashed var(--line);
+	border-radius: var(--radius);
+	padding: 10px 14px;
+	margin-top: 16px;
+}
+
+/* ---------- 콘텐츠 섹션 ---------- */
+
+.content-section {
+	margin: 40px 0;
+}
+
+.content-section table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9rem;
+	margin: 1em 0;
+}
+
+.content-section th,
+.content-section td {
+	border: 1px solid var(--line);
+	padding: 8px 10px;
+	text-align: left;
+}
+
+.content-section th {
+	background: var(--card);
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	color: var(--muted);
+}
+
+/* ---------- FAQ ---------- */
+
+.faq-item {
+	border-bottom: 1px solid var(--line);
+	padding: 14px 0;
+}
+
+.faq-item summary {
+	cursor: pointer;
+	font-weight: 700;
+	list-style: none;
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.faq-item summary::-webkit-details-marker {
+	display: none;
+}
+
+.faq-item summary::after {
+	content: '+';
+	color: var(--ledger);
+	font-family: var(--font-mono);
+}
+
+.faq-item[open] summary::after {
+	content: '−';
+}
+
+.faq-item p {
+	margin-top: 10px;
+	color: var(--muted);
+}
+
+/* ---------- 관련 계산기 링크 ---------- */
+
+.related-links {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.related-links a {
+	display: block;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	padding: 12px 14px;
+	text-decoration: none;
+	color: var(--ink);
+	background: var(--card);
+	font-size: 0.9rem;
+}
+
+.related-links a:hover {
+	border-color: var(--ledger);
+}
+
+.related-links .related-links__label {
+	display: block;
+	font-size: 0.72rem;
+	color: var(--muted);
+	font-family: var(--font-mono);
+	margin-bottom: 2px;
+}
+
+/* ---------- 광고 슬롯 ---------- */
+
+.ad-slot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100px;
+	border: 1px dashed var(--line);
+	border-radius: var(--radius);
+	color: var(--muted);
+	font-size: 0.75rem;
+	font-family: var(--font-mono);
+	margin: 28px 0;
+	background: repeating-linear-gradient(
+		45deg,
+		transparent,
+		transparent 8px,
+		rgba(217, 221, 212, 0.4) 8px,
+		rgba(217, 221, 212, 0.4) 16px
+	);
+}
+
+/* ---------- 홈: 계산기 목록 ---------- */
+
+.calc-grid {
+	display: grid;
+	gap: 14px;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	margin: 24px 0;
+}
+
+.calc-tile {
+	display: block;
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	padding: 18px;
+	text-decoration: none;
+	color: var(--ink);
+	box-shadow: var(--shadow-card);
+	transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.calc-tile:hover {
+	border-color: var(--ledger);
+	transform: translateY(-2px);
+}
+
+.calc-tile__no {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--seal);
+}
+
+.calc-tile__title {
+	font-family: var(--font-title);
+	font-size: 1.1rem;
+	font-weight: 700;
+	margin: 6px 0 4px;
+}
+
+.calc-tile__desc {
+	font-size: 0.85rem;
+	color: var(--muted);
+	margin: 0;
+}
+
+@media (max-width: 640px) {
+	.site-header__inner {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}

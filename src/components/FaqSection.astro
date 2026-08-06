@@ -1,0 +1,22 @@
+---
+interface QA {
+	q: string;
+	a: string;
+}
+interface Props {
+	items: QA[];
+}
+const { items } = Astro.props;
+---
+
+<section class="content-section">
+	<h2>자주 묻는 질문</h2>
+	{
+		items.map((item) => (
+			<details class="faq-item">
+				<summary>{item.q}</summary>
+				<p>{item.a}</p>
+			</details>
+		))
+	}
+</section>

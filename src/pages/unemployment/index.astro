@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '실업급여 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'이직 전 평균임금과 고용보험 가입기간으로 2026년 구직급여(실업급여) 예상 수급액과 소정급여일수를 계산합니다.';
+const pageUrl = new URL('/unemployment/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '실업급여(구직급여)는 아무나 받을 수 있나요?',
+		a: '자발적 퇴사는 원칙적으로 대상이 아닙니다. 권고사직, 계약만료, 정당한 사유의 자발적 이직 등 고용보험법이 정한 요건을 충족하고, 이직일 이전 18개월간 피보험단위기간이 180일 이상이어야 합니다.',
+	},
+	{
+		q: '소정급여일수는 어떻게 정해지나요?',
+		a: '고용보험 가입기간과 이직 당시 연령(50세 기준)에 따라 120일부터 270일까지 차등 지급됩니다. 가입기간이 길고 연령이 높을수록 지급일수가 늘어납니다.',
+	},
+	{
+		q: '왜 하한액이 상한액에 가깝게 계산되나요?',
+		a: '구직급여 하한액은 최저임금의 80%를 기준으로 정해집니다. 최저임금이 매년 오르면서 하한액도 함께 올라, 평균임금이 낮은 경우 대부분 하한액이 적용되는 경우가 많습니다. 2026년에는 상한액과 하한액의 차이가 특히 좁습니다.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '실업급여 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>실업급여 계산기</h1>
+	<p>이직일, 이직 전 3개월 급여, 고용보험 가입기간을 입력하면 예상 구직급여를 계산합니다.</p>
+
+	<CalculatorCard no="06" label="JOBSEEKER BENEFIT">
+		<form id="unemployment-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="resignDate">이직일</label>
+					<div class="field__control">
+						<input type="date" id="resignDate" required />
+					</div>
+				</div>
+				<div class="field">
+					<label for="threeMonthWage">이직 전 3개월 총 급여</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="threeMonthWage" required placeholder="9,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="insuredYears">고용보험 가입기간</label>
+					<div class="field__control">
+						<input type="text" inputmode="decimal" id="insuredYears" required placeholder="3" />
+						<span class="field__unit">년</span>
+					</div>
+				</div>
+				<div class="field">
+					<label>연령대</label>
+					<div class="field-radio-group">
+						<label><input type="radio" name="ageGroup" value="under50" checked /><span>50세 미만</span></label>
+						<label><input type="radio" name="ageGroup" value="over50" /><span>50세 이상·장애인</span></label>
+					</div>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">실업급여 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label">1일 평균임금</span>
+				<span class="value" id="r-avgWage">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">1일 구직급여액</span>
+				<span class="value" id="r-daily">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">소정급여일수</span>
+				<span class="value" id="r-days">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">총 예상 수급액</span>
+				<span class="value" id="r-total">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>구직급여, 얼마나 받을 수 있나</h2>
+		<p>
+			구직급여(실업급여)는 "이직 전 평균임금의 60% × 소정급여일수"로 계산합니다. 1일 구직급여액에는
+			상한액(2026년 68,100원)과 하한액(2026년 66,048원)이 있어, 계산된 금액이 이 범위를 벗어나면
+			상한 또는 하한 금액으로 조정됩니다.
+		</p>
+		<table>
+			<tbody>
+				<tr><th>가입기간 1년 미만</th><td>120일 (연령 무관)</td></tr>
+				<tr><th>1년 이상 3년 미만</th><td>50세 미만 150일 · 50세 이상 180일</td></tr>
+				<tr><th>3년 이상 5년 미만</th><td>50세 미만 180일 · 50세 이상 210일</td></tr>
+				<tr><th>5년 이상 10년 미만</th><td>50세 미만 210일 · 50세 이상 240일</td></tr>
+				<tr><th>10년 이상</th><td>50세 미만 240일 · 50세 이상 270일</td></tr>
+			</tbody>
+		</table>
+		<p>
+			하한액은 최저임금의 80%에 하루 소정근로시간(8시간)을 곱해 정해지는데, 최저임금이 매년
+			오르면서 상한액과의 격차가 점점 좁아지고 있습니다. 2026년에는 최저임금이 시급 10,320원으로
+			오르면서 하한액(66,048원)이 상한액(68,100원)에 바짝 다가섰습니다. 이 때문에 평균임금이 낮거나
+			중간 수준인 상당수 수급자가 하한액을 적용받게 됩니다. 실업급여는 퇴사 후 곧바로 신청해야
+			하는 것이 아니라, 워크넷 구직등록과 고용센터 방문(또는 온라인) 수급자격 인정 신청 절차를
+			거쳐야 하며, 이직 사유가 자발적 퇴사인 경우 원칙적으로 지급 대상에서 제외됩니다.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="unemployment" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script>
+	import { calcUnemploymentBenefit } from '../../lib/unemployment.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	attachCommaFormatting(document.getElementById('threeMonthWage'));
+
+	const form = document.getElementById('unemployment-form');
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const resignDate = document.getElementById('resignDate').value;
+		const threeMonthWage = parseNumber(document.getElementById('threeMonthWage').value);
+		const insuredYears = parseFloat(document.getElementById('insuredYears').value) || 0;
+		const isOver50 = form.querySelector('input[name="ageGroup"]:checked').value === 'over50';
+
+		const result = calcUnemploymentBenefit({ resignDate, threeMonthWage, insuredYears, isOver50 });
+
+		document.getElementById('r-avgWage').textContent = formatWon(result.averageDailyWage);
+		document.getElementById('r-daily').textContent = formatWon(result.dailyBenefit);
+		document.getElementById('r-days').textContent = `${result.benefitDays}일`;
+		document.getElementById('r-total').textContent = formatWon(result.totalBenefit);
+
+		document.getElementById('result').classList.add('is-visible');
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+	});
+</script>

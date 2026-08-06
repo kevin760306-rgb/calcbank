@@ -1,0 +1,171 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '예금 이자 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'단리·복리 예금 이자와 이자소득세를 뗀 세후 만기 수령액을 계산합니다. 일반과세 15.4%, 세금우대 9.5%, 비과세 조건 비교 가능.';
+const pageUrl = new URL('/deposit/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '단리와 복리는 무엇이 다른가요?',
+		a: '단리는 원금에 대해서만 이자가 붙습니다. 복리는 발생한 이자에도 다시 이자가 붙어, 예치 기간이 길수록 복리 상품의 최종 수령액이 더 커집니다. 이 계산기의 복리는 월복리 기준입니다.',
+	},
+	{
+		q: '이자소득세는 얼마나 떼나요?',
+		a: '일반적인 예·적금은 이자소득세 14%와 지방소득세 1.4%를 더한 15.4%가 원천징수됩니다. 새마을금고·신협 등 일부 조합의 예탁금은 3천만원까지 9.5%(농특세 포함) 세금우대가 적용될 수 있고, ISA 등 일부 상품은 비과세 혜택이 있습니다.',
+	},
+	{
+		q: '적금도 이 계산기로 계산할 수 있나요?',
+		a: '아니요. 이 계산기는 목돈을 한 번에 예치하는 예금 기준입니다. 매달 일정액을 납입하는 적금은 회차별로 예치 기간이 달라 이자 계산 방식이 다릅니다.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '예금 이자 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>예금 이자 계산기</h1>
+	<p>예치금액, 금리, 예치기간을 입력하면 세전·세후 이자와 만기 수령액을 계산합니다.</p>
+
+	<CalculatorCard no="03" label="DEPOSIT INTEREST">
+		<form id="deposit-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="principal">예치금액</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="principal" required placeholder="10,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="annualRate">연 금리</label>
+					<div class="field__control">
+						<input type="text" inputmode="decimal" id="annualRate" required placeholder="3.0" />
+						<span class="field__unit">%</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="months">예치기간</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="months" required placeholder="12" />
+						<span class="field__unit">개월</span>
+					</div>
+				</div>
+			</div>
+			<div class="field-grid" style="margin-top:16px;">
+				<div class="field">
+					<label>이자 방식</label>
+					<div class="field-radio-group">
+						<label><input type="radio" name="interestType" value="simple" checked /><span>단리</span></label>
+						<label><input type="radio" name="interestType" value="compound" /><span>월복리</span></label>
+					</div>
+				</div>
+				<div class="field">
+					<label>과세 유형</label>
+					<div class="field-radio-group">
+						<label><input type="radio" name="taxType" value="general" checked /><span>일반과세 15.4%</span></label>
+						<label><input type="radio" name="taxType" value="preferential" /><span>세금우대 9.5%</span></label>
+						<label><input type="radio" name="taxType" value="taxFree" /><span>비과세</span></label>
+					</div>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">이자 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label">세전 이자</span>
+				<span class="value" id="r-interest">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">이자과세</span>
+				<span class="value" id="r-tax">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">세후 이자</span>
+				<span class="value" id="r-net">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">만기 수령액</span>
+				<span class="value" id="r-maturity">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>예금 이자, 세금까지 계산해야 진짜 수익률</h2>
+		<p>
+			예금 이자는 "원금 × 금리 × (예치개월수 ÷ 12)"인 단리 방식과, 매달 발생한 이자에도 이자가
+			붙는 복리 방식으로 나뉩니다. 단리 상품과 복리 상품이 표면금리가 같더라도 예치 기간이
+			길어질수록 복리 쪽 실수령액이 커집니다.
+		</p>
+		<p>
+			은행에서 안내하는 예금 금리는 세전 기준입니다. 실제 통장에 찍히는 금액은 여기서 이자소득세를
+			뺀 금액입니다. 일반 정기예금은 이자소득세 14%와 지방소득세 1.4%를 더한 15.4%가
+			원천징수됩니다. 새마을금고·신협·농협 단위조합 등의 예탁금 상품은 조합원을 대상으로 1인당
+			3천만원 한도 내에서 세금우대(9.5%)를 적용받을 수 있어 실질 수익률이 더 높습니다. 청년도약계좌,
+			ISA 만기 등 일부 정책성 상품은 이자소득이 비과세되기도 합니다.
+		</p>
+		<p>
+			이 계산기는 예치 기간 전체에 동일한 금리가 적용된다고 가정합니다. 실제로는 중도해지 시
+			약정금리보다 낮은 중도해지이율이 적용되고, 우대금리 조건(급여이체, 카드실적 등)을 충족하지
+			못하면 표시금리보다 낮은 금리가 적용될 수 있습니다. 정확한 금액은 가입하려는 금융회사의
+			상품설명서를 확인하세요.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="deposit" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script>
+	import { calcDeposit } from '../../lib/deposit.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	attachCommaFormatting(document.getElementById('principal'));
+
+	const form = document.getElementById('deposit-form');
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const principal = parseNumber(document.getElementById('principal').value);
+		const annualRatePercent = parseFloat(document.getElementById('annualRate').value) || 0;
+		const months = parseNumber(document.getElementById('months').value);
+		const interestType = form.querySelector('input[name="interestType"]:checked').value;
+		const taxType = form.querySelector('input[name="taxType"]:checked').value;
+
+		const result = calcDeposit({ principal, annualRatePercent, months, interestType, taxType });
+
+		document.getElementById('r-interest').textContent = formatWon(result.interest);
+		document.getElementById('r-tax').textContent = `-${formatWon(result.tax)}`;
+		document.getElementById('r-net').textContent = formatWon(result.netInterest);
+		document.getElementById('r-maturity').textContent = formatWon(result.maturityAmount);
+
+		document.getElementById('result').classList.add('is-visible');
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+	});
+</script>

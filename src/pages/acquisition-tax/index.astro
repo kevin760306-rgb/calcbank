@@ -1,0 +1,172 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '부동산 취득세 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'주택 취득가액, 보유 주택 수, 조정대상지역 여부에 따른 취득세·지방교육세·농어촌특별세를 계산합니다.';
+const pageUrl = new URL('/acquisition-tax/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '취득세율은 어떻게 정해지나요?',
+		a: '무주택자·1주택자가 유상으로 주택을 매매할 때는 취득가액에 따라 6억원 이하 1%, 6억~9억원 슬라이딩 구간, 9억원 초과 3%의 표준세율이 적용됩니다. 조정대상지역에서 2주택 이상을 취득하면 8~12%의 중과세율이 적용될 수 있습니다.',
+	},
+	{
+		q: '지방교육세·농어촌특별세는 무엇인가요?',
+		a: '취득세를 낼 때 함께 부과되는 부가세(附加稅)입니다. 표준세율 구간에서는 지방교육세가 취득세액의 10%이며, 전용면적이 85㎡를 초과하면 농어촌특별세(과세표준의 0.2%)가 추가됩니다. 다주택 중과 구간은 계산 방식이 별도로 정해져 있습니다.',
+	},
+	{
+		q: '조정대상지역인지는 어떻게 확인하나요?',
+		a: '국토교통부·각 지자체가 지정하는 조정대상지역 목록은 수시로 바뀝니다. 국토교통부 홈페이지나 위택스에서 취득하려는 주택 소재지가 조정대상지역인지 확인해야 정확한 세율을 알 수 있습니다.',
+	},
+	{
+		q: '지방 미분양 주택이나 인구감소지역 특례는 반영되나요?',
+		a: '아니요. 2026년부터 시행되는 지방 준공후 미분양주택 감면, 인구감소지역 특례 등은 조건이 세부적이라 이 계산기에서는 반영하지 않았습니다. 해당 사항이 있다면 관할 지자체 세무부서에 별도로 문의하세요.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '부동산 취득세 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>부동산 취득세 계산기</h1>
+	<p>취득가액, 보유 주택 수, 조정대상지역 여부와 전용면적을 입력하면 취득세와 부가세를 계산합니다.</p>
+
+	<CalculatorCard no="07" label="ACQUISITION TAX">
+		<form id="tax-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="price">취득가액</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="price" required placeholder="750,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="homeCount">취득 후 보유 주택 수</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="homeCount" required placeholder="1" />
+						<span class="field__unit">채</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="exclusiveAreaSqm">전용면적</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="exclusiveAreaSqm" required placeholder="84" />
+						<span class="field__unit">㎡</span>
+					</div>
+				</div>
+			</div>
+			<div class="field" style="margin-top:16px;">
+				<label>조정대상지역 여부</label>
+				<div class="field-radio-group">
+					<label><input type="radio" name="isRegulated" value="no" checked /><span>비조정지역</span></label>
+					<label><input type="radio" name="isRegulated" value="yes" /><span>조정대상지역</span></label>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">취득세 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label">적용 세율</span>
+				<span class="value" id="r-rate">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">취득세</span>
+				<span class="value" id="r-tax">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">지방교육세</span>
+				<span class="value" id="r-edu">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">농어촌특별세</span>
+				<span class="value" id="r-rural">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">총 납부세액</span>
+				<span class="value" id="r-total">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>주택 취득세, 세율부터 부가세까지</h2>
+		<p>
+			주택을 유상으로 취득하면 취득가액에 취득세율을 곱해 취득세를 계산하고, 여기에 지방교육세와
+			(전용면적 85㎡ 초과 시) 농어촌특별세를 더해 최종 납부세액이 정해집니다.
+		</p>
+		<table>
+			<tbody>
+				<tr><th>6억원 이하</th><td>1%</td></tr>
+				<tr><th>6억원 초과 9억원 이하</th><td>(취득가액×2/3억 − 3) / 100 (약 1~3% 슬라이딩)</td></tr>
+				<tr><th>9억원 초과</th><td>3%</td></tr>
+				<tr><th>조정대상지역 2주택</th><td>8%</td></tr>
+				<tr><th>조정대상지역 3주택 이상·법인</th><td>12%</td></tr>
+			</tbody>
+		</table>
+		<p>
+			예를 들어 취득가액 7억 5천만원, 전용면적 100㎡인 1주택자라면 세율 2%가 적용되어 취득세
+			1,500만원, 지방교육세 150만원(취득세의 10%), 농어촌특별세 150만원(과세표준의 0.2%)을 더해
+			총 1,800만원을 납부합니다. 다주택 중과 구간은 지방교육세·농어촌특별세 산정 방식이 표준세율
+			구간과 다르며, 지역별 감면 특례(지방 미분양주택, 인구감소지역 등)가 적용될 수도 있으므로
+			실제 납부 전에는 반드시 위택스(wetax.go.kr)의 지방세 미리계산 서비스나 관할 시·군·구
+			세무부서를 통해 정확한 금액을 확인해야 합니다.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="acquisition-tax" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script>
+	import { calcAcquisitionTax } from '../../lib/acquisitionTax.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	attachCommaFormatting(document.getElementById('price'));
+
+	const form = document.getElementById('tax-form');
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const price = parseNumber(document.getElementById('price').value);
+		const homeCount = parseNumber(document.getElementById('homeCount').value) || 1;
+		const exclusiveAreaSqm = parseFloat(document.getElementById('exclusiveAreaSqm').value) || 0;
+		const isRegulated = form.querySelector('input[name="isRegulated"]:checked').value === 'yes';
+
+		const result = calcAcquisitionTax({ price, homeCount, isRegulated, exclusiveAreaSqm });
+
+		document.getElementById('r-rate').textContent = `${(result.rate * 100).toFixed(2)}%`;
+		document.getElementById('r-tax').textContent = formatWon(result.acquisitionTax);
+		document.getElementById('r-edu').textContent = formatWon(result.localEducationTax);
+		document.getElementById('r-rural').textContent = formatWon(result.ruralSpecialTax);
+		document.getElementById('r-total').textContent = formatWon(result.totalTax);
+
+		document.getElementById('result').classList.add('is-visible');
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+	});
+</script>

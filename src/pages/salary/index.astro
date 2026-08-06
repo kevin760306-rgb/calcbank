@@ -1,0 +1,167 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorCard from '../../components/CalculatorCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import FaqSection from '../../components/FaqSection.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { webApplicationJsonLd, faqJsonLd } from '../../utils/seo.js';
+
+const title = '연봉 실수령액 계산기 – 2026년 기준 | 머니장부';
+const description =
+	'2026년 국민연금·건강보험·고용보험 요율을 반영해 연봉에서 4대 보험과 세금을 뗀 월 실수령액을 계산합니다.';
+const pageUrl = new URL('/salary/', Astro.site).toString();
+
+const faqs = [
+	{
+		q: '4대 보험료는 어떻게 계산되나요?',
+		a: '국민연금 4.75%, 건강보험 3.595%, 장기요양보험(건강보험료의 13.14%), 고용보험 0.9%가 월급에서 공제됩니다(2026년 근로자 부담분 기준). 국민연금은 기준소득월액 상한(659만원)과 하한(41만원)이 적용됩니다.',
+	},
+	{
+		q: '부양가족 수는 실수령액에 얼마나 영향을 주나요?',
+		a: '부양가족(본인 포함) 1인당 연 150만원의 인적공제가 과세표준에서 빠집니다. 부양가족이 많을수록 과세표준이 낮아져 소득세가 줄고 실수령액이 늘어납니다.',
+	},
+	{
+		q: '이 계산기의 세금은 국세청 간이세액표와 똑같나요?',
+		a: '아니요. 국세청 근로소득 간이세액표는 방대한 조견표 형태라 이 계산기에서는 근로소득공제·인적공제·사회보험료공제·근로소득세액공제를 반영해 연간 세액을 근사 계산한 뒤 12로 나눕니다. 실제 원천징수액과 월 1만원 내외 차이가 날 수 있습니다.',
+	},
+	{
+		q: '연봉에 상여금이나 성과급이 포함되어 있어도 되나요?',
+		a: '네, 이 계산기는 세전 연봉(각종 수당·상여 포함 총액) 기준으로 계산합니다. 다만 실제 회사에서는 상여금 지급월에 그 달만 원천징수 세액이 커지는 등 월별 편차가 있을 수 있습니다.',
+	},
+];
+
+const jsonLd = [
+	webApplicationJsonLd({ name: '연봉 실수령액 계산기', description, url: pageUrl }),
+	faqJsonLd(faqs),
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+	<h1>연봉 실수령액 계산기</h1>
+	<p>세전 연봉과 부양가족 수를 입력하면 4대 보험료와 소득세를 뗀 월 실수령액을 계산합니다.</p>
+
+	<CalculatorCard no="04" label="NET SALARY">
+		<form id="salary-form">
+			<div class="field-grid">
+				<div class="field">
+					<label for="annualSalary">세전 연봉</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="annualSalary" required placeholder="40,000,000" />
+						<span class="field__unit">원</span>
+					</div>
+				</div>
+				<div class="field">
+					<label for="dependents">부양가족 수(본인 포함)</label>
+					<div class="field__control">
+						<input type="text" inputmode="numeric" id="dependents" required placeholder="1" />
+						<span class="field__unit">명</span>
+					</div>
+				</div>
+			</div>
+			<button type="submit" class="btn-calc">실수령액 계산하기</button>
+		</form>
+
+		<AdSlot position="top" />
+
+		<div class="ledger-result" id="result">
+			<div class="ledger-result__row">
+				<span class="label">세전 월급</span>
+				<span class="value" id="r-gross">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">국민연금</span>
+				<span class="value" id="r-pension">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">건강보험</span>
+				<span class="value" id="r-health">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">장기요양보험</span>
+				<span class="value" id="r-ltc">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">고용보험</span>
+				<span class="value" id="r-employment">-</span>
+			</div>
+			<div class="ledger-result__row">
+				<span class="label">소득세 + 지방소득세</span>
+				<span class="value" id="r-tax">-</span>
+			</div>
+			<div class="ledger-result__row ledger-result__row--total">
+				<span class="label">월 실수령액</span>
+				<span class="value" id="r-net">-</span>
+			</div>
+			<div class="result-stamp-wrap">
+				<div class="result-stamp" id="stamp">확인</div>
+			</div>
+		</div>
+
+		<Disclaimer />
+	</CalculatorCard>
+
+	<article class="content-section">
+		<h2>연봉에서 실수령액까지, 무엇을 떼나요</h2>
+		<p>
+			연봉 계약서에 적힌 금액은 세전 총액입니다. 매달 통장에 들어오는 실수령액은 여기서 4대
+			보험료(국민연금·건강보험·장기요양보험·고용보험)와 근로소득세·지방소득세를 뺀 금액입니다.
+			산재보험료는 회사가 전액 부담하므로 근로자 실수령액 계산에는 포함되지 않습니다.
+		</p>
+		<table>
+			<tbody>
+				<tr><th>국민연금</th><td>월급의 4.75% (기준소득월액 상한 659만원, 하한 41만원)</td></tr>
+				<tr><th>건강보험</th><td>월급의 3.595%</td></tr>
+				<tr><th>장기요양보험</th><td>건강보험료의 13.14%</td></tr>
+				<tr><th>고용보험</th><td>월급의 0.9%</td></tr>
+				<tr><th>소득세</th><td>근로소득공제·인적공제 반영한 과세표준에 누진세율 적용</td></tr>
+			</tbody>
+		</table>
+		<p>
+			국민연금은 2026년부터 보험료율이 기존 9%에서 9.5%로 오르기 시작해 2033년까지 매년
+			0.5%포인트씩 인상됩니다. 소득세는 총급여에서 근로소득공제를 뺀 근로소득금액에서 다시
+			부양가족 인적공제(1인당 150만원)와 4대 보험료를 공제한 과세표준에 6~45% 누진세율을 적용해
+			계산하며, 여기에 근로소득세액공제를 추가로 반영해 최종 세액을 줄입니다. 국세청이 실제로
+			사용하는 근로소득 간이세액표는 이 계산 결과를 조견표 형태로 미리 정리해 둔 것이라 세부
+			처리 방식에 따라 이 계산기 결과와 월 1만원 안팎의 차이가 날 수 있습니다.
+		</p>
+	</article>
+
+	<AdSlot position="middle" />
+
+	<FaqSection items={faqs} />
+
+	<RelatedLinks slug="salary" />
+
+	<AdSlot position="bottom" />
+</BaseLayout>
+
+<script>
+	import { calcNetSalary } from '../../lib/salary.js';
+	import { attachCommaFormatting, parseNumber, formatWon } from '../../scripts/number-input.js';
+
+	attachCommaFormatting(document.getElementById('annualSalary'));
+
+	const form = document.getElementById('salary-form');
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const annualSalary = parseNumber(document.getElementById('annualSalary').value);
+		const dependents = Math.max(parseNumber(document.getElementById('dependents').value) || 1, 1);
+
+		const result = calcNetSalary({ annualSalary, dependents });
+
+		document.getElementById('r-gross').textContent = formatWon(result.monthlySalary);
+		document.getElementById('r-pension').textContent = `-${formatWon(result.nationalPension)}`;
+		document.getElementById('r-health').textContent = `-${formatWon(result.healthInsurance)}`;
+		document.getElementById('r-ltc').textContent = `-${formatWon(result.longTermCare)}`;
+		document.getElementById('r-employment').textContent = `-${formatWon(result.employmentInsurance)}`;
+		document.getElementById('r-tax').textContent = `-${formatWon(result.monthlyIncomeTax + result.monthlyLocalTax)}`;
+		document.getElementById('r-net').textContent = formatWon(result.monthlyNet);
+
+		document.getElementById('result').classList.add('is-visible');
+		const stamp = document.getElementById('stamp');
+		stamp.classList.remove('is-visible');
+		void stamp.offsetWidth;
+		stamp.classList.add('is-visible');
+	});
+</script>

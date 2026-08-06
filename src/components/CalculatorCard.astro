@@ -1,0 +1,15 @@
+---
+interface Props {
+	no: string;
+	label: string;
+}
+const { no, label } = Astro.props;
+---
+
+<div class="ledger-card">
+	<div class="ledger-card__header">
+		<span>{label} · No. {no}</span>
+		<span>머니장부</span>
+	</div>
+	<slot />
+</div>

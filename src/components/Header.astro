@@ -1,0 +1,19 @@
+---
+import { calculators } from '../data/calculators-meta.js';
+---
+
+<header class="site-header">
+	<div class="site-header__inner">
+		<a class="brand" href="/">
+			<span class="brand__mark">머니</span><span>장부</span>
+		</a>
+		<nav class="site-nav" aria-label="계산기 메뉴">
+			{
+				calculators.map((c) => (
+					<a href={`/${c.slug}/`}>{c.short}</a>
+				))
+			}
+			<a href="/about/">소개</a>
+		</nav>
+	</div>
+</header>
