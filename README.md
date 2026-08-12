@@ -20,9 +20,15 @@
 - `src/components/` — 공통 UI(장부 카드, 결과 스탬프, 광고 슬롯, FAQ, 관련 링크 등)
 - `src/pages/` — 계산기별 라우트 (`/severance/`, `/loan/` 등)
 
-## 배포 전 확인할 것
+## 배포 (Cloudflare Pages)
 
-1. `astro.config.mjs`의 `site`와 `public/robots.txt`의 sitemap URL을 실제 도메인으로 교체
-2. GitHub Pages에 배포한다면 `public/CNAME` 파일을 추가하고 저장소 Pages 설정에서 커스텀 도메인 지정
-3. `.github/workflows/deploy.yml`은 `main` 브랜치 push 시 테스트 → 빌드 → GitHub Pages 배포를 자동 실행하도록 준비되어 있음 (원격 저장소 연결 및 push는 별도로 진행)
-4. `src/data/rates.js`에 적어둔 출처 주석을 참고해 요율이 매년 바뀌는지 확인
+1. GitHub 원격 저장소에 push
+2. Cloudflare 대시보드 → Workers & Pages → Create → Pages → Connect to Git → 이 저장소 선택
+3. 빌드 설정: Build command `npm run build`, Build output directory `dist`, Node 버전 22
+4. Pages 프로젝트 → Custom domains에서 `calcbank.kr` 추가 (도메인 네임서버가 Cloudflare로 되어 있어야 함)
+5. `astro.config.mjs`의 `site`는 이미 `https://calcbank.kr`로 설정되어 있음 — 도메인이 바뀌면 이 값과 `public/robots.txt`의 sitemap URL을 함께 교체
+
+## 기타 확인할 것
+
+- `src/data/rates.js`에 적어둔 출처 주석을 참고해 요율이 매년 바뀌는지 확인
+- 애드센스 승인 후에는 `src/components/AdSlot.astro`의 플레이스홀더를 실제 광고 코드로 교체하고, `public/ads.txt`에 퍼블리셔 ID를 추가
