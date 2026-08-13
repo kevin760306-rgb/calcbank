@@ -9,17 +9,24 @@ export function calcStandardAcquisitionRate(price) {
 	return (price * (2 / 300_000_000) - 3) / 100;
 }
 
+/**
+ * 다주택 중과가 시작되는 주택 수는 조정대상지역·비조정대상지역이 다르다.
+ * 조정대상지역: 2주택 8% / 3주택 이상 12%. 비조정대상지역: 3주택 8% / 4주택 이상 12%.
+ */
 export function getAcquisitionRate({ price, homeCount, isRegulated }) {
-	if (homeCount >= 2 && isRegulated) {
-		const key = Math.min(homeCount, 4);
-		return ACQUISITION_TAX.multiHomeRate[key] ?? ACQUISITION_TAX.multiHomeRate[4];
+	if (isRegulated) {
+		if (homeCount >= 3) return ACQUISITION_TAX.multiHomeRate.regulated[3];
+		if (homeCount === 2) return ACQUISITION_TAX.multiHomeRate.regulated[2];
+	} else {
+		if (homeCount >= 4) return ACQUISITION_TAX.multiHomeRate.nonRegulated[4];
+		if (homeCount === 3) return ACQUISITION_TAX.multiHomeRate.nonRegulated[3];
 	}
 	return calcStandardAcquisitionRate(price);
 }
 
 export function calcAcquisitionTax({ price, homeCount = 1, isRegulated = false, exclusiveAreaSqm = 84 }) {
 	const rate = getAcquisitionRate({ price, homeCount, isRegulated });
-	const isMultiHomeSurtax = homeCount >= 2 && isRegulated;
+	const isMultiHomeSurtax = (isRegulated && homeCount >= 2) || (!isRegulated && homeCount >= 3);
 	const acquisitionTax = price * rate;
 
 	const isOver85 = exclusiveAreaSqm > ACQUISITION_TAX.ruralSpecialTaxAreaThresholdSqm;
