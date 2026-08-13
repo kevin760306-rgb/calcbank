@@ -19,7 +19,7 @@ const faqs = [
 	},
 	{
 		q: '지방교육세·농어촌특별세는 무엇인가요?',
-		a: '취득세를 낼 때 함께 부과되는 부가세(附加稅)입니다. 표준세율 구간에서는 지방교육세가 취득세액의 10%이며, 전용면적이 85㎡를 초과하면 농어촌특별세(과세표준의 0.2%, 다주택 중과 시 0.6~1.0%)가 추가됩니다. 다주택 중과 구간의 부가세 산정은 사안별로 달라질 수 있어 이 계산기는 근사치로 안내하며, 정확한 금액은 위택스나 관할 지자체에서 확인하는 것이 정확합니다.',
+		a: '취득세를 낼 때 함께 부과되는 부가세(附加稅)입니다. 전용면적 85㎡ 이하는 농어촌특별세가 면적 기준으로 전액 비과세이고, 85㎡를 초과할 때만 부과됩니다(표준세율 구간 0.2%, 다주택 중과 구간 약 1.0%). 지방교육세는 표준세율 구간에서는 취득세액의 10%이며, 다주택 중과 구간의 지방교육세·농어촌특별세 산정은 이 계산기가 근사치로 안내하니 정확한 금액은 위택스나 관할 지자체에서 확인하는 것이 정확합니다.',
 	},
 	{
 		q: '조정대상지역인지는 어떻게 확인하나요?',
@@ -107,6 +107,11 @@ const jsonLd = [
 				<div class="result-stamp" id="stamp">확인</div>
 			</div>
 		</div>
+
+		<p class="disclaimer" id="multihome-note" style="display:none;">
+			다주택 중과 세율이 적용된 결과입니다. 지방교육세·농어촌특별세는 근사치이며, 정확한 금액은
+			위택스나 관할 지자체에서 다시 확인하세요.
+		</p>
 
 		<Disclaimer />
 	</CalculatorCard>
@@ -208,6 +213,7 @@ const jsonLd = [
 		document.getElementById('r-edu').textContent = formatWon(result.localEducationTax);
 		document.getElementById('r-rural').textContent = formatWon(result.ruralSpecialTax);
 		document.getElementById('r-total').textContent = formatWon(result.totalTax);
+		document.getElementById('multihome-note').style.display = result.isMultiHomeSurtax ? 'block' : 'none';
 
 		document.getElementById('result').classList.add('is-visible');
 		const stamp = document.getElementById('stamp');

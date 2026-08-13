@@ -128,13 +128,13 @@ export const ACQUISITION_TAX = {
 		regulated: { 2: 0.08, 3: 0.12 },
 		nonRegulated: { 3: 0.08, 4: 0.12 },
 	},
-	// 다주택 중과 시 지방교육세는 표준세율 2% 적용분 기준으로 고정(2%×20%=0.4%),
-	// 농특세는 중과 케이스 전용 세율(85㎡ 이하 0.6% · 초과 1.0%)을 적용 — 산출 근거 재검증 필요.
-	// 콘텐츠에는 이 수치를 단정적으로 노출하지 않는다.
+	// 다주택 중과 시 지방교육세는 표준세율 2% 적용분 기준으로 고정(2%×20%=0.4%) — 산출 근거
+	// 재검증 필요. 농특세는 전용면적 85㎡ 이하는 면적과 무관하게 전액 비과세이며(표준세율
+	// 케이스와 동일한 원칙), 85㎡ 초과 시에만 중과 케이스 전용 세율(1.0%)이 부과된다 — 이
+	// 세율의 산출 근거도 재검증 필요. 콘텐츠·화면 모두 이 수치를 단정적으로 노출하지 않는다.
 	multiHomeSurtax: {
 		localEducationTaxRate: 0.004,
 		ruralSpecialTaxRateOver85: 0.01,
-		ruralSpecialTaxRateUnder85: 0.006,
 	},
 	localEducationTaxRateOfTax: 0.1,
 	ruralSpecialTaxRate: 0.002,

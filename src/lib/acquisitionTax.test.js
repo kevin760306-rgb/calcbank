@@ -95,3 +95,37 @@ test('calcAcquisitionTax: 비조정지역 3주택도 8% 중과가 적용된다 (
 	assert.equal(result.localEducationTax, 2_000_000);
 	assert.equal(result.ruralSpecialTax, 5_000_000);
 });
+
+test('calcAcquisitionTax: 다주택 중과라도 85㎡ 이하는 농특세 비과세 (회귀 방지)', () => {
+	const result = calcAcquisitionTax({
+		price: 750_000_000,
+		homeCount: 3,
+		isRegulated: false,
+		exclusiveAreaSqm: 84,
+	});
+	assert.equal(result.rate, 0.08);
+	assert.equal(result.acquisitionTax, 60_000_000);
+	assert.equal(result.ruralSpecialTax, 0);
+	assert.equal(result.isMultiHomeSurtax, true);
+});
+
+test('calcAcquisitionTax: 다주택 중과 + 85㎡ 초과는 농특세가 부과된다', () => {
+	const result = calcAcquisitionTax({
+		price: 750_000_000,
+		homeCount: 3,
+		isRegulated: false,
+		exclusiveAreaSqm: 100,
+	});
+	assert.equal(result.ruralSpecialTax, 7_500_000);
+});
+
+test('calcAcquisitionTax: 1주택(표준세율) + 85㎡ 초과는 농특세 0.2%', () => {
+	const result = calcAcquisitionTax({
+		price: 750_000_000,
+		homeCount: 1,
+		isRegulated: false,
+		exclusiveAreaSqm: 100,
+	});
+	assert.equal(result.ruralSpecialTax, 1_500_000);
+	assert.equal(result.isMultiHomeSurtax, false);
+});

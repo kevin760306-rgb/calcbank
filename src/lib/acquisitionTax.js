@@ -35,11 +35,8 @@ export function calcAcquisitionTax({ price, homeCount = 1, isRegulated = false, 
 	let ruralSpecialTax;
 	if (isMultiHomeSurtax) {
 		localEducationTax = price * ACQUISITION_TAX.multiHomeSurtax.localEducationTaxRate;
-		ruralSpecialTax =
-			price *
-			(isOver85
-				? ACQUISITION_TAX.multiHomeSurtax.ruralSpecialTaxRateOver85
-				: ACQUISITION_TAX.multiHomeSurtax.ruralSpecialTaxRateUnder85);
+		// 농어촌특별세는 전용면적 85㎡ 이하면 다주택 여부와 무관하게 항상 비과세다.
+		ruralSpecialTax = isOver85 ? price * ACQUISITION_TAX.multiHomeSurtax.ruralSpecialTaxRateOver85 : 0;
 	} else {
 		localEducationTax = acquisitionTax * ACQUISITION_TAX.localEducationTaxRateOfTax;
 		ruralSpecialTax = isOver85 ? price * ACQUISITION_TAX.ruralSpecialTaxRate : 0;
@@ -49,6 +46,7 @@ export function calcAcquisitionTax({ price, homeCount = 1, isRegulated = false, 
 
 	return {
 		rate,
+		isMultiHomeSurtax,
 		acquisitionTax: Math.round(acquisitionTax),
 		localEducationTax: Math.round(localEducationTax),
 		ruralSpecialTax: Math.round(ruralSpecialTax),
